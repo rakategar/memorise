@@ -1,5 +1,8 @@
 package com.example
 
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.get
+import kotlinx.cinterop.set
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,7 +41,8 @@ actual class SoundManager actual constructor() {
         }
     }
 
-    private fun playPcmBuffer(samples: ShortArray) {
+    @OptIn(ExperimentalForeignApi::class)
+    private suspend fun playPcmBuffer(samples: ShortArray) {
         val format = AVAudioFormat(standardFormatWithSampleRate = sampleRate.toDouble(), channels = 1u)
             ?: return
         val engine = AVAudioEngine()
@@ -58,7 +62,7 @@ actual class SoundManager actual constructor() {
             playerNode.scheduleBuffer(buffer, completionHandler = null)
             playerNode.play()
             val durationMs = (samples.size * 1000L) / sampleRate
-            Thread.sleep(durationMs + 100)
+            delay(durationMs + 100)
         } catch (e: Exception) {
             // Ignore
         } finally {

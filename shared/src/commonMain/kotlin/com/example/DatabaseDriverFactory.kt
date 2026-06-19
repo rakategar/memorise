@@ -10,11 +10,6 @@ private val IntColumnAdapter = object : ColumnAdapter<Int, Long> {
     override fun encode(value: Int) = value.toLong()
 }
 
-private val BooleanColumnAdapter = object : ColumnAdapter<Boolean, Long> {
-    override fun decode(databaseValue: Long) = databaseValue != 0L
-    override fun encode(value: Boolean) = if (value) 1L else 0L
-}
-
 fun createQuizDatabase(): QuizDatabase {
     val driver = createSqlDriver()
     return QuizDatabase(
@@ -22,9 +17,7 @@ fun createQuizDatabase(): QuizDatabase {
         StageProgressAdapter = StageProgress.Adapter(
             levelIdAdapter = IntColumnAdapter,
             stageIdAdapter = IntColumnAdapter,
-            starsCountAdapter = IntColumnAdapter,
-            isCompletedAdapter = BooleanColumnAdapter,
-            isUnlockedAdapter = BooleanColumnAdapter
+            starsCountAdapter = IntColumnAdapter
         )
     )
 }

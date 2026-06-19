@@ -37,7 +37,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import kotlin.random.Random
+
+/** Multiplatform replacement for JVM-only String.format("%.Nf", value). */
+private fun formatDecimal(value: Float, digits: Int): String {
+    var factor = 1
+    repeat(digits) { factor *= 10 }
+    val scaled = (value * factor).roundToInt()
+    val intPart = scaled / factor
+    val fracPart = (scaled % factor).toString().padStart(digits, '0')
+    return "$intPart.$fracPart"
+}
 
 @Composable
 fun App(vm: QuizViewModel) {
@@ -1080,7 +1091,7 @@ fun StageMapNode(
         if (bestTimeSec != null && isCompleted) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
                 Text(
-                    text = "⏱️ ${"%.1f".format(bestTimeSec)}s",
+                    text = "⏱️ ${formatDecimal(bestTimeSec, 1)}s",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF10B981)
@@ -1206,7 +1217,7 @@ fun GameplayScreen(
                         Text("⏱️", fontSize = 16.sp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "${"%.2f".format(elapsedSec)} s",
+                            text = "${formatDecimal(elapsedSec, 2)} s",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Black,
                             color = Color(0xFF1F2937)
