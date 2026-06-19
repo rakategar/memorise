@@ -5,6 +5,7 @@ import '../audio/sound_manager.dart';
 import '../data/quiz_questions.dart';
 import '../models/question.dart';
 import '../state/quiz_controller.dart';
+import '../state/scoring.dart';
 import '../widgets/confetti.dart';
 
 class SummaryScreen extends StatefulWidget {
@@ -32,19 +33,9 @@ class _SummaryScreenState extends State<SummaryScreen> with TickerProviderStateM
   late final List<AnimationController> _starCtrls;
   late final AnimationController _scoreCtrl;
 
-  int get _baseScore => widget.isSuccess ? 500 : 0;
-  int get _starBonus => widget.isSuccess
-      ? (widget.stars == 3
-          ? 500
-          : widget.stars == 2
-              ? 300
-              : widget.stars == 1
-                  ? 150
-                  : 0)
-      : 0;
-  int get _timeBonus => widget.isSuccess
-      ? ((15000 - widget.timeSpentMs) ~/ 20).clamp(0, 500)
-      : 0;
+  int get _baseScore => Scoring.baseScore(widget.isSuccess);
+  int get _starBonus => Scoring.starBonus(widget.isSuccess, widget.stars);
+  int get _timeBonus => Scoring.timeBonus(widget.isSuccess, widget.timeSpentMs);
   int get _totalScore => _baseScore + _starBonus + _timeBonus;
 
   @override
@@ -103,9 +94,7 @@ class _SummaryScreenState extends State<SummaryScreen> with TickerProviderStateM
     final secondsTotal = widget.timeSpentMs ~/ 1000;
     final timeFormatted =
         '${(secondsTotal ~/ 60).toString().padLeft(2, '0')}:${(secondsTotal % 60).toString().padLeft(2, '0')}';
-    final accuracyFormatted = widget.isSuccess
-        ? (widget.stars == 3 ? '100%' : widget.stars == 2 ? '95%' : '90%')
-        : '0%';
+    final accuracyFormatted = Scoring.accuracyLabel(widget.isSuccess, widget.stars);
 
     return Container(
       color: const Color(0xFF0C1F3D),

@@ -5,8 +5,11 @@ import 'package:flutter/foundation.dart';
 import '../audio/sound_manager.dart';
 import '../data/quiz_questions.dart';
 import '../data/quiz_repository.dart';
+import '../data/remote_progress_service.dart';
+import '../models/app_user.dart';
 import '../models/question.dart';
 import '../models/stage_progress.dart';
+import 'scoring.dart';
 
 /// Navigation destinations. Mirrors the original sealed `Screen` interface.
 sealed class AppScreen {
@@ -48,12 +51,33 @@ class SummaryState extends AppScreen {
 }
 
 /// Central game state. Mirrors `QuizViewModel` (navigation, observation /
-/// answer timers, scoring, progress persistence).
+/// answer timers, scoring, progress persistence) plus per-user identity and
+/// two-way Google Sheets sync.
 class QuizController extends ChangeNotifier {
-  QuizController({required this.repository, required this.soundManager});
+  QuizController({
+    required this.repository,
+    required this.soundManager,
+    required this.remote,
+  });
 
   final QuizRepository repository;
   final SoundManager soundManager;
+  final RemoteProgressService remote;
+
+  AppUser? _currentUser;
+  AppUser? get currentUser => _currentUser;
+  String get _userId => _currentUser?.id ?? '';
+
+  bool _isSyncing = false;
+  bool get isSyncing => _isSyncing;
+
+  /// Set by the auth gate; performs the actual Clerk sign-out.
+  Future<void> Function()? signOutHandler;
+
+  Future<void> requestSignOut() async {
+    soundManager.playSound(SfxType.click);
+    await signOutHandler?.call();
+  }
 
   AppScreen _currentScreen = const SplashScreenState();
   AppScreen get currentScreen => _currentScreen;
@@ -83,15 +107,51 @@ class QuizController extends ChangeNotifier {
   Timer? _answerTicker;
   Stopwatch? _answerStopwatch;
 
-  Future<void> init() async {
-    await repository.initializeDefaultDataIfEmpty();
-    await _refreshProgress();
-    // Auto-run background music loop.
+  /// Start background music. Progress is loaded per-user via [onUserSignedIn].
+  void start() {
     soundManager.startBgmLoop();
   }
 
+  /// Called once when a user signs in (or changes). Seeds local data, pulls the
+  /// user's cloud progress and merges it, then pushes a fresh summary row.
+  Future<void> onUserSignedIn(AppUser user) async {
+    if (_currentUser?.id == user.id) return;
+    _currentUser = user;
+    _currentScreen = const SplashScreenState();
+    _isSyncing = true;
+    notifyListeners();
+
+    try {
+      await repository.initializeDefaultDataIfEmpty(user.id);
+      if (remote.isEnabled) {
+        final remoteProgress = await remote.pullUserProgress(user.id);
+        if (remoteProgress.isNotEmpty) {
+          await repository.mergeRemoteProgress(user.id, remoteProgress);
+        }
+      }
+    } catch (e) {
+      debugPrint('Cloud sync on sign-in failed: $e');
+    }
+
+    await _refreshProgress();
+    if (remote.isEnabled) {
+      unawaited(_pushUserSummary());
+    }
+    _isSyncing = false;
+    notifyListeners();
+  }
+
+  void onSignedOut() {
+    _cancelTimers();
+    _currentUser = null;
+    _progressList = const [];
+    _currentScreen = const SplashScreenState();
+    notifyListeners();
+  }
+
   Future<void> _refreshProgress() async {
-    _progressList = await repository.getAllProgress();
+    if (_currentUser == null) return;
+    _progressList = await repository.getAllProgress(_userId);
     notifyListeners();
   }
 
@@ -180,47 +240,100 @@ class QuizController extends ChangeNotifier {
 
     final q = _currentQuestion!;
     final isCorrect = optionIndex == q.correctAnswerIndex;
+    final elapsed = _answerTimeElapsedMs;
 
     if (isCorrect) {
-      final stars = _answerTimeElapsedMs < 3000
+      final stars = elapsed < 3000
           ? 3
-          : _answerTimeElapsedMs < 7000
+          : elapsed < 7000
               ? 2
               : 1;
       soundManager.playSound(SfxType.correct);
-      await repository.saveProgress(q.levelId, q.stageId, stars, _answerTimeElapsedMs);
-      await _refreshProgress();
+      if (_currentUser != null) {
+        await repository.saveProgress(_userId, q.levelId, q.stageId, stars, elapsed);
+        await _refreshProgress();
+      }
+      _pushRemote(q, stars, elapsed, true);
       await Future<void>.delayed(const Duration(milliseconds: 350));
       navigateTo(SummaryState(
         levelId: q.levelId,
         stageId: q.stageId,
         isSuccess: true,
         stars: stars,
-        timeSpentMs: _answerTimeElapsedMs,
+        timeSpentMs: elapsed,
       ));
     } else {
       soundManager.playSound(SfxType.incorrect);
+      _pushRemote(q, 0, elapsed, false);
       await Future<void>.delayed(const Duration(milliseconds: 350));
       navigateTo(SummaryState(
         levelId: q.levelId,
         stageId: q.stageId,
         isSuccess: false,
         stars: 0,
-        timeSpentMs: _answerTimeElapsedMs,
+        timeSpentMs: elapsed,
       ));
+    }
+  }
+
+  /// Fire-and-forget push of a completion event + refreshed user summary.
+  void _pushRemote(Question q, int stars, int timeMs, bool isSuccess) {
+    if (!remote.isEnabled) return;
+    final user = _currentUser;
+    if (user == null) return;
+    final score = Scoring.total(isSuccess, stars, timeMs);
+    unawaited(() async {
+      try {
+        await remote.appendProgressLog(
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          levelId: q.levelId,
+          stageId: q.stageId,
+          stars: stars,
+          timeSpentMs: timeMs,
+          score: score,
+          isSuccess: isSuccess,
+        );
+        await _pushUserSummary();
+      } catch (e) {
+        debugPrint('Remote progress push failed: $e');
+      }
+    }());
+  }
+
+  Future<void> _pushUserSummary() async {
+    final user = _currentUser;
+    if (user == null) return;
+    final totalStars = _progressList.fold<int>(0, (s, p) => s + p.starsCount);
+    final solved = _progressList.where((p) => p.isCompleted).length;
+    try {
+      await remote.upsertUserSummary(
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        totalStars: totalStars,
+        solvedStages: solved,
+      );
+    } catch (e) {
+      debugPrint('User summary upsert failed: $e');
     }
   }
 
   Future<void> resetGame() async {
     soundManager.playSound(SfxType.click);
-    await repository.resetAllProgress();
+    if (_currentUser == null) return;
+    await repository.resetAllProgress(_userId);
     await _refreshProgress();
+    if (remote.isEnabled) unawaited(_pushUserSummary());
   }
 
   Future<void> unlockAll() async {
     soundManager.playSound(SfxType.click);
-    await repository.unlockAllProgress();
+    if (_currentUser == null) return;
+    await repository.unlockAllProgress(_userId);
     await _refreshProgress();
+    if (remote.isEnabled) unawaited(_pushUserSummary());
   }
 
   void toggleMusic() {

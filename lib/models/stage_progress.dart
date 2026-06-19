@@ -1,6 +1,7 @@
-/// Persisted progress for one stage. Mirrors the original Room `StageProgress`
-/// entity (composite primary key of levelId + stageId).
+/// Persisted progress for one stage, scoped to a signed-in user.
+/// Composite primary key: (userId, levelId, stageId).
 class StageProgress {
+  final String userId;
   final int levelId;
   final int stageId;
   final int starsCount;
@@ -9,6 +10,7 @@ class StageProgress {
   final bool isUnlocked;
 
   const StageProgress({
+    required this.userId,
     required this.levelId,
     required this.stageId,
     required this.starsCount,
@@ -17,7 +19,24 @@ class StageProgress {
     required this.isUnlocked,
   });
 
+  StageProgress copyWith({
+    int? starsCount,
+    int? timeSpentMs,
+    bool? isCompleted,
+    bool? isUnlocked,
+  }) =>
+      StageProgress(
+        userId: userId,
+        levelId: levelId,
+        stageId: stageId,
+        starsCount: starsCount ?? this.starsCount,
+        timeSpentMs: timeSpentMs ?? this.timeSpentMs,
+        isCompleted: isCompleted ?? this.isCompleted,
+        isUnlocked: isUnlocked ?? this.isUnlocked,
+      );
+
   Map<String, Object?> toMap() => {
+        'userId': userId,
         'levelId': levelId,
         'stageId': stageId,
         'starsCount': starsCount,
@@ -27,6 +46,7 @@ class StageProgress {
       };
 
   factory StageProgress.fromMap(Map<String, Object?> map) => StageProgress(
+        userId: (map['userId'] as String?) ?? '',
         levelId: map['levelId'] as int,
         stageId: map['stageId'] as int,
         starsCount: map['starsCount'] as int,

@@ -16,6 +16,9 @@ dependencies:
   sqflite: ^2.3.3
   path: ^1.9.0
   audioplayers: ^6.1.0
+  clerk_flutter: ^0.0.16-beta
+  gsheets: ^0.5.0
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -27,3 +30,4 @@ flutter:
 
   assets:
     - assets/audio/
+    - .env

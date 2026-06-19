@@ -63,13 +63,20 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   _pill(
                     bg: Colors.white,
                     border: const Color(0xFFE2E8F0),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('🧑‍🚀', style: TextStyle(fontSize: 16)),
-                        SizedBox(width: 6),
-                        Text('Player',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF475569))),
+                        const Text('🧑‍🚀', style: TextStyle(fontSize: 16)),
+                        const SizedBox(width: 6),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 120),
+                          child: Text(
+                            vm.currentUser?.name ?? 'Player',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF475569)),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -330,6 +337,23 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     ),
                   ),
                 ],
+              ),
+              const Divider(color: Color(0xFFE2E8F0)),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    vm.requestSignOut();
+                  },
+                  icon: const Icon(Icons.logout, size: 16, color: Color(0xFF64748B)),
+                  label: const Text('Keluar Akun',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFCBD5E1)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
               ),
             ],
           ),

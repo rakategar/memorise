@@ -1,9 +1,13 @@
+import 'package:clerk_flutter/clerk_flutter.dart' as clerk;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'config/app_config.dart';
+import 'models/app_user.dart';
 import 'screens/gameplay_screen.dart';
 import 'screens/intro_loading_screen.dart';
 import 'screens/level_select_screen.dart';
+import 'screens/sign_in_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/stage_select_screen.dart';
 import 'screens/summary_screen.dart';
@@ -20,8 +24,75 @@ class MemoriseApp extends StatelessWidget {
       title: 'Memorise',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: const _RootRouter(),
+      home: const _AuthGate(),
     );
+  }
+}
+
+/// Gates the game behind Clerk authentication. Shows a config notice when keys
+/// are missing, the sign-in screen when signed out, and the game when signed in.
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!AppConfig.isClerkConfigured) {
+      return const _ConfigNeededScreen();
+    }
+    return clerk.ClerkErrorListener(
+      child: clerk.ClerkAuthBuilder(
+        signedOutBuilder: (context, authState) => const SignInScreen(),
+        signedInBuilder: (context, authState) => _AuthenticatedRoot(authState: authState),
+      ),
+    );
+  }
+}
+
+class _AuthenticatedRoot extends StatefulWidget {
+  const _AuthenticatedRoot({required this.authState});
+  final clerk.ClerkAuthState authState;
+
+  @override
+  State<_AuthenticatedRoot> createState() => _AuthenticatedRootState();
+}
+
+class _AuthenticatedRootState extends State<_AuthenticatedRoot> {
+  String? _syncedUserId;
+
+  AppUser? _appUser() {
+    final u = widget.authState.user;
+    if (u == null) return null;
+    final fullName = u.name.trim();
+    final email = u.email ?? '';
+    return AppUser(
+      id: u.id,
+      email: email,
+      name: fullName.isNotEmpty ? fullName : (email.isNotEmpty ? email : 'Player'),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.read<QuizController>();
+    final user = _appUser();
+
+    if (user != null && _syncedUserId != user.id) {
+      _syncedUserId = user.id;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.signOutHandler = () async {
+          await widget.authState.signOut();
+          controller.onSignedOut();
+          if (mounted) setState(() => _syncedUserId = null);
+        };
+        controller.onUserSignedIn(user);
+      });
+    }
+
+    final vm = context.watch<QuizController>();
+    if (user == null || vm.currentUser == null || vm.isSyncing) {
+      return const _SyncingScreen();
+    }
+    return const _RootRouter();
   }
 }
 
@@ -89,6 +160,56 @@ class _RootRouterState extends State<_RootRouter> {
         switchInCurve: Curves.easeInOut,
         switchOutCurve: Curves.easeInOut,
         child: child,
+      ),
+    );
+  }
+}
+
+class _SyncingScreen extends StatelessWidget {
+  const _SyncingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.background,
+      alignment: Alignment.center,
+      child: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(color: Color(0xFF3B82F6)),
+          SizedBox(height: 16),
+          Text('Menyiapkan progresmu...',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConfigNeededScreen extends StatelessWidget {
+  const _ConfigNeededScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.background,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(28),
+      child: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('⚙️', style: TextStyle(fontSize: 44)),
+          SizedBox(height: 12),
+          Text('Konfigurasi diperlukan',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF1E355E))),
+          SizedBox(height: 8),
+          Text(
+            'Isi CLERK_PUBLISHABLE_KEY (dan GOOGLE_SHEETS_*) di file .env, '
+            'lalu jalankan ulang aplikasi. Lihat .env.example.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: Color(0xFF475569), height: 1.4),
+          ),
+        ],
       ),
     );
   }

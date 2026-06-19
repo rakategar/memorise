@@ -1,30 +1,29 @@
 import '../models/stage_progress.dart';
 import 'quiz_database.dart';
 
-/// Data access layer for stage progress. Mirrors the original Kotlin
-/// `QuizRepository` (seed / reset / save / unlock logic).
+/// Data access layer for stage progress (per user). Mirrors the original Kotlin
+/// `QuizRepository`, extended with userId scoping + remote-merge for cloud sync.
 class QuizRepository {
   QuizRepository(this._db);
 
   final QuizDatabase _db;
 
-  Future<List<StageProgress>> getAllProgress() => _db.getAllProgress();
+  Future<List<StageProgress>> getAllProgress(String userId) => _db.getAllProgress(userId);
 
-  Future<void> initializeDefaultDataIfEmpty() async {
-    final current = await _db.getAllProgress();
+  Future<void> initializeDefaultDataIfEmpty(String userId) async {
+    final current = await _db.getAllProgress(userId);
     if (current.isEmpty) {
-      await resetAllProgress();
+      await resetAllProgress(userId);
     }
   }
 
-  Future<void> resetAllProgress() async {
-    await _db.clearProgress();
-    // Prepopulate 3 levels, each with 10 stages.
+  Future<void> resetAllProgress(String userId) async {
+    await _db.clearProgress(userId);
     for (var lvl = 1; lvl <= 3; lvl++) {
       for (var stg = 1; stg <= 10; stg++) {
-        // First stage of Level 1 is unlocked by default.
         final unlocked = lvl == 1 && stg == 1;
         await _db.insertProgress(StageProgress(
+          userId: userId,
           levelId: lvl,
           stageId: stg,
           starsCount: 0,
@@ -36,11 +35,12 @@ class QuizRepository {
     }
   }
 
-  Future<void> unlockAllProgress() async {
-    await _db.clearProgress();
+  Future<void> unlockAllProgress(String userId) async {
+    await _db.clearProgress(userId);
     for (var lvl = 1; lvl <= 3; lvl++) {
       for (var stg = 1; stg <= 10; stg++) {
         await _db.insertProgress(StageProgress(
+          userId: userId,
           levelId: lvl,
           stageId: stg,
           starsCount: 3,
@@ -53,17 +53,16 @@ class QuizRepository {
   }
 
   Future<void> saveProgress(
+    String userId,
     int levelId,
     int stageId,
     int stars,
     int elapsedMs,
   ) async {
-    final current = await _db.getProgressForStage(levelId, stageId);
+    final current = await _db.getProgressForStage(userId, levelId, stageId);
 
-    // Preserve best stars and fastest time.
     final newStars =
         current != null ? (current.starsCount > stars ? current.starsCount : stars) : stars;
-
     final int newTime;
     if (current != null) {
       newTime = current.timeSpentMs <= 0
@@ -74,6 +73,7 @@ class QuizRepository {
     }
 
     await _db.insertProgress(StageProgress(
+      userId: userId,
       levelId: levelId,
       stageId: stageId,
       starsCount: newStars,
@@ -82,13 +82,12 @@ class QuizRepository {
       isUnlocked: true,
     ));
 
-    await _unlockNextStage(levelId, stageId);
+    await _unlockNextStage(userId, levelId, stageId);
   }
 
-  Future<void> _unlockNextStage(int currentLvl, int currentStg) async {
+  Future<void> _unlockNextStage(String userId, int currentLvl, int currentStg) async {
     final int nextLvl;
     final int nextStg;
-
     if (currentStg < 10) {
       nextLvl = currentLvl;
       nextStg = currentStg + 1;
@@ -96,11 +95,12 @@ class QuizRepository {
       nextLvl = currentLvl + 1;
       nextStg = 1;
     } else {
-      return; // Already at last stage of last level.
+      return;
     }
 
-    final next = await _db.getProgressForStage(nextLvl, nextStg);
+    final next = await _db.getProgressForStage(userId, nextLvl, nextStg);
     await _db.insertProgress(StageProgress(
+      userId: userId,
       levelId: nextLvl,
       stageId: nextStg,
       starsCount: next?.starsCount ?? 0,
@@ -108,5 +108,64 @@ class QuizRepository {
       isCompleted: next?.isCompleted ?? false,
       isUnlocked: true,
     ));
+  }
+
+  /// Merge cloud progress into local: take best stars (max) and best time (min)
+  /// per stage, mark completed, then recompute unlocks. Used on login (cloud
+  /// save). Ensures defaults exist first.
+  Future<void> mergeRemoteProgress(String userId, List<StageProgress> remote) async {
+    await initializeDefaultDataIfEmpty(userId);
+
+    for (final r in remote) {
+      final local = await _db.getProgressForStage(userId, r.levelId, r.stageId);
+      final bestStars = local == null ? r.starsCount : (local.starsCount > r.starsCount ? local.starsCount : r.starsCount);
+      final int bestTime;
+      if (local == null || local.timeSpentMs <= 0) {
+        bestTime = r.timeSpentMs;
+      } else if (r.timeSpentMs <= 0) {
+        bestTime = local.timeSpentMs;
+      } else {
+        bestTime = local.timeSpentMs < r.timeSpentMs ? local.timeSpentMs : r.timeSpentMs;
+      }
+      await _db.insertProgress(StageProgress(
+        userId: userId,
+        levelId: r.levelId,
+        stageId: r.stageId,
+        starsCount: bestStars,
+        timeSpentMs: bestTime,
+        isCompleted: (local?.isCompleted ?? false) || r.isCompleted,
+        isUnlocked: true,
+      ));
+    }
+
+    await _recomputeUnlocks(userId);
+  }
+
+  /// Recompute which stages are unlocked from completion state:
+  /// L1S1 always; a stage unlocks if the previous stage is completed; the first
+  /// stage of a level unlocks if the last stage of the previous level is completed.
+  Future<void> _recomputeUnlocks(String userId) async {
+    final all = await _db.getAllProgress(userId);
+    final byKey = {for (final p in all) '${p.levelId}_${p.stageId}': p};
+
+    bool completed(int lvl, int stg) => byKey['${lvl}_$stg']?.isCompleted ?? false;
+
+    for (var lvl = 1; lvl <= 3; lvl++) {
+      for (var stg = 1; stg <= 10; stg++) {
+        final current = byKey['${lvl}_$stg'];
+        if (current == null) continue;
+        final bool unlocked;
+        if (lvl == 1 && stg == 1) {
+          unlocked = true;
+        } else if (stg > 1) {
+          unlocked = completed(lvl, stg - 1);
+        } else {
+          unlocked = completed(lvl - 1, 10);
+        }
+        if (unlocked && !current.isUnlocked) {
+          await _db.insertProgress(current.copyWith(isUnlocked: true));
+        }
+      }
+    }
   }
 }
