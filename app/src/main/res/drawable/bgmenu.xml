@@ -1,0 +1,117 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="360dp"
+    android:height="740dp"
+    android:viewportWidth="360"
+    android:viewportHeight="740">
+
+    <!-- 1. The Sky Gradient (Bright blue to horizon soft cyan) -->
+    <path android:pathData="M0,0 h360 v740 h-360 z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="180"
+                android:startY="0"
+                android:endX="180"
+                android:endY="740"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF3897F2" />
+                <item android:offset="0.30" android:color="#FF5DAEF7" />
+                <item android:offset="0.55" android:color="#FF96D5FA" />
+                <item android:offset="0.75" android:color="#FFD6F0FE" />
+                <item android:offset="1.0" android:color="#FFE8F7FF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 2. Gentle clouds in the upper sky (semi-transparent white) -->
+    <path
+        android:pathData="M20,100 C40,100 50,110 60,110 C70,110 80,100 100,100 C120,100 130,115 150,115 C170,115 180,105 200,105 C220,105 230,120 250,120 L250,135 L20,135 Z"
+        android:fillColor="#30FFFFFF" />
+
+    <!-- 3. Giant majestic fluffy clouds (representing the core anime look in the background) -->
+    <!-- Draw beautiful large cloud puff bodies -->
+    <path
+        android:pathData="M-20,440 Q10,380 40,400 Q80,310 160,330 Q220,220 300,260 Q340,240 380,280 L380,500 L-20,500 Z"
+        android:fillColor="#CCE1F4FC" />
+    <path
+        android:pathData="M-10,450 Q20,390 50,410 Q90,325 165,345 Q225,240 295,280 Q335,255 375,295 L375,502 L-10,502 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- Soft highlight detail on clouds -->
+    <path
+        android:pathData="M80,370 Q110,340 140,350 Q160,340 180,350 Q210,330 230,360 Z"
+        android:fillColor="#EBF7FF" />
+
+    <!-- 4. Distant majestic mountain ranges (soft blue-green) -->
+    <path android:pathData="M-50,600 L10,560 Q80,520 150,550 Q210,520 280,560 L410,510 L410,750 L-50,750 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="180"
+                android:startY="520"
+                android:endX="180"
+                android:endY="740"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF7BB7D8" />
+                <item android:offset="0.5" android:color="#FF8BBED9" />
+                <item android:offset="1.0" android:color="#FFA2D2CE" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 5. Middle distance gentle green hills -->
+    <path android:pathData="M-20,640 Q60,590 140,610 Q220,580 300,600 Q340,585 380,600 L380,750 L-20,750 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="180"
+                android:startY="580"
+                android:endX="180"
+                android:endY="750"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF83CF5E" />
+                <item android:offset="0.6" android:color="#FF97D968" />
+                <item android:offset="1.0" android:color="#FF8AB851" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 6. Foreground vibrant green rolling fields (sloping from lower-left to bottom-right) -->
+    <path android:pathData="M-20,680 C120,640 240,680 380,630 L380,750 L-20,750 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="180"
+                android:startY="630"
+                android:endX="180"
+                android:endY="750"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF5EB82D" />
+                <item android:offset="0.5" android:color="#FF77CC3C" />
+                <item android:offset="1.0" android:color="#FF388F1D" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Very close foreground turf slope details (lower left and lower right grass blades) -->
+    <path android:pathData="M-10,720 Q70,700 150,715 Q250,695 370,710 L370,750 L-10,750 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="180"
+                android:startY="695"
+                android:endX="180"
+                android:endY="750"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FF40A313" />
+                <item android:offset="1.0" android:color="#FF1A5E04" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Decorative small flowers in the foreground -->
+    <path android:pathData="M30,730 A3,3 0 1,1 24,730 A3,3 0 1,1 30,730 Z" android:fillColor="#FFFFEB3B"/>
+    <path android:pathData="M27,730 A1.5,1.5 0 1,1 24,730 A1.5,1.5 0 1,1 27,730 Z" android:fillColor="#FFFF9800"/>
+
+    <path android:pathData="M160,724 A4,4 0 1,1 152,724 A4,4 0 1,1 160,724 Z" android:fillColor="#FFFFEB3B"/>
+    <path android:pathData="M156,724 A2,2 0 1,1 152,724 A2,2 0 1,1 156,724 Z" android:fillColor="#FFFF9800"/>
+
+    <path android:pathData="M280,728 A3.5,3.5 0 1,1 273,728 A3.5,3.5 0 1,1 280,728 Z" android:fillColor="#FFFFEB3B"/>
+    <path android:pathData="M276.5,728 A1.75,1.75 0 1,1 273,728 A1.75,1.75 0 1,1 276.5,728 Z" android:fillColor="#FFFF9800"/>
+</vector>
