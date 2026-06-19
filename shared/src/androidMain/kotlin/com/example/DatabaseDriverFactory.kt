@@ -1,3 +1,5 @@
+@file:JvmName("DatabaseDriverFactoryAndroid")
+
 package com.example
 
 import app.cash.sqldelight.db.SqlDriver
