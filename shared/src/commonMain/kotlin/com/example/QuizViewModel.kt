@@ -1,17 +1,15 @@
 package com.example
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -23,21 +21,15 @@ sealed interface Screen {
     data class Summary(val levelId: Int, val stageId: Int, val isSuccess: Boolean, val stars: Int, val timeSpentMs: Long) : Screen
 }
 
-class QuizViewModel(application: Application) : AndroidViewModel(application) {
+class QuizViewModel : ViewModel() {
 
-    private val database = androidx.room.Room.databaseBuilder(
-        application,
-        QuizDatabase::class.java, "quiz_db"
-    ).build()
+    private val database = createQuizDatabase()
+    private val repository = QuizRepository(database.stageProgressQueries)
+    val soundManager = SoundManager()
 
-    private val repository = QuizRepository(database.stageProgressDao())
-    val soundManager = SoundManager(application)
-
-    // Screen navigation state
     var currentScreen by mutableStateOf<Screen>(Screen.Splash)
         private set
 
-    // All stage progress flows from Room db
     val progressList: StateFlow<List<StageProgress>> = repository.allProgress
         .stateIn(
             scope = viewModelScope,
@@ -45,25 +37,21 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = emptyList()
         )
 
-    // Current quiz active question
     var currentQuestion by mutableStateOf<Question?>(null)
         private set
 
-    // Observation phase state
     var isObservationPhase by mutableStateOf(false)
         private set
     var observationTimer by mutableStateOf(0)
         private set
     private var observationJob: Job? = null
 
-    // Answer phase state
     var isAnswerPhase by mutableStateOf(false)
         private set
     var answerTimeElapsedMs by mutableStateOf(0L)
         private set
     private var answerJob: Job? = null
 
-    // Selected option during quiz
     var selectedOptionIndex by mutableStateOf<Int?>(null)
         private set
 
@@ -71,15 +59,12 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.initializeDefaultDataIfEmpty()
         }
-        // Auto-run background chiptune arpeggio
         soundManager.startBgmLoop()
     }
 
     fun navigateTo(screen: Screen) {
-        soundManager.playSound(SoundManager.sfxType.CLICK)
+        soundManager.playSound(SfxType.CLICK)
         currentScreen = screen
-
-        // Handle entering gameplay screen
         if (screen is Screen.Gameplay) {
             setupGameplay(screen.levelId, screen.stageId)
         }
@@ -93,13 +78,11 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
 
         if (q != null) {
             if (q.observationTimeSecs > 0) {
-                // Start Observation Phase
                 isObservationPhase = true
                 isAnswerPhase = false
                 observationTimer = q.observationTimeSecs
                 startObservationTimer()
             } else {
-                // No observation, jump straight to quiz answering
                 isObservationPhase = false
                 isAnswerPhase = true
                 startAnswerTiming()
@@ -108,7 +91,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun skipObservation() {
-        soundManager.playSound(SoundManager.sfxType.CLICK)
+        soundManager.playSound(SfxType.CLICK)
         observationJob?.cancel()
         enterAnswerPhase()
     }
@@ -120,8 +103,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
                 delay(1000)
                 observationTimer -= 1
                 if (observationTimer > 0 && observationTimer <= 4) {
-                    // Soft ticking sound warning time limit
-                    soundManager.playSound(SoundManager.sfxType.TICK)
+                    soundManager.playSound(SfxType.TICK)
                 }
                 if (observationTimer == 0) {
                     enterAnswerPhase()
@@ -140,10 +122,10 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         answerJob?.cancel()
         answerTimeElapsedMs = 0L
         answerJob = viewModelScope.launch {
-            val startTime = System.currentTimeMillis()
+            val startTime = currentTimeMillis()
             while (isAnswerPhase) {
                 delay(30)
-                answerTimeElapsedMs = System.currentTimeMillis() - startTime
+                answerTimeElapsedMs = currentTimeMillis() - startTime
             }
         }
     }
@@ -151,8 +133,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
     fun submitAnswer(optionIndex: Int) {
         if (selectedOptionIndex != null || currentQuestion == null) return
         selectedOptionIndex = optionIndex
-        
-        // Stop timer
+
         isAnswerPhase = false
         answerJob?.cancel()
 
@@ -161,21 +142,17 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             if (isCorrect) {
-                // Calculate stars based on speed
                 val stars = when {
                     answerTimeElapsedMs < 3000L -> 3
                     answerTimeElapsedMs < 7000L -> 2
                     else -> 1
                 }
-                
-                soundManager.playSound(SoundManager.sfxType.CORRECT)
+                soundManager.playSound(SfxType.CORRECT)
                 repository.saveProgress(q.levelId, q.stageId, stars, answerTimeElapsedMs)
-                
-                // Show winning screen/modal with 250ms delayed transition
                 delay(350)
                 navigateTo(Screen.Summary(q.levelId, q.stageId, isSuccess = true, stars = stars, timeSpentMs = answerTimeElapsedMs))
             } else {
-                soundManager.playSound(SoundManager.sfxType.INCORRECT)
+                soundManager.playSound(SfxType.INCORRECT)
                 delay(350)
                 navigateTo(Screen.Summary(q.levelId, q.stageId, isSuccess = false, stars = 0, timeSpentMs = answerTimeElapsedMs))
             }
@@ -183,29 +160,23 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun resetGame() {
-        soundManager.playSound(SoundManager.sfxType.CLICK)
-        viewModelScope.launch {
-            repository.resetAllProgress()
-        }
+        soundManager.playSound(SfxType.CLICK)
+        viewModelScope.launch { repository.resetAllProgress() }
     }
 
     fun unlockAll() {
-        soundManager.playSound(SoundManager.sfxType.CLICK)
-        viewModelScope.launch {
-            repository.unlockAllProgress()
-        }
+        soundManager.playSound(SfxType.CLICK)
+        viewModelScope.launch { repository.unlockAllProgress() }
     }
 
-    // Toggle background music
     fun toggleMusic() {
-        soundManager.playSound(SoundManager.sfxType.CLICK)
+        soundManager.playSound(SfxType.CLICK)
         soundManager.isMusicEnabled = !soundManager.isMusicEnabled
     }
 
-    // Toggle sound effects
     fun toggleSound() {
         soundManager.isSoundEnabled = !soundManager.isSoundEnabled
-        soundManager.playSound(SoundManager.sfxType.CLICK)
+        soundManager.playSound(SfxType.CLICK)
     }
 
     override fun onCleared() {
@@ -213,3 +184,5 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         super.onCleared()
     }
 }
+
+expect fun currentTimeMillis(): Long

@@ -1,0 +1,28 @@
+import kotlin.Boolean;
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS StageProgress (
+    levelId INTEGER AS Int NOT NULL,
+    stageId INTEGER AS Int NOT NULL,
+    starsCount INTEGER AS Int NOT NULL DEFAULT 0,
+    timeSpentMs INTEGER NOT NULL DEFAULT 0,
+    isCompleted INTEGER AS Boolean NOT NULL DEFAULT 0,
+    isUnlocked INTEGER AS Boolean NOT NULL DEFAULT 0,
+    PRIMARY KEY (levelId, stageId)
+);
+
+getAllProgress:
+SELECT * FROM StageProgress ORDER BY levelId ASC, stageId ASC;
+
+getProgressForStage:
+SELECT * FROM StageProgress WHERE levelId = ? AND stageId = ? LIMIT 1;
+
+insertProgress:
+INSERT OR REPLACE INTO StageProgress(levelId, stageId, starsCount, timeSpentMs, isCompleted, isUnlocked)
+VALUES (?, ?, ?, ?, ?, ?);
+
+unlockStage:
+UPDATE StageProgress SET isUnlocked = 1 WHERE levelId = ? AND stageId = ?;
+
+clearProgress:
+DELETE FROM StageProgress;
