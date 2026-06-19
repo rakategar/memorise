@@ -1,6 +1,0 @@
-{
-  "name": "Memorise",
-  "description": "An interactive cognitive quiz game that measures memory, attention, and spatial observation skills with delightful kid-friendly visual designs and cheerful glockenspiel melodies.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
