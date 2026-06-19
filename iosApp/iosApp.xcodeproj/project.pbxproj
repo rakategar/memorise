@@ -13,7 +13,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		5001B6AC2A38C9E400A2490B /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5001B6AD2A38C9E400A2490B /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5001B6B02A38C9E400A2490B /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		5001B6B22A38C9E400A2490B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5001B6B42A38C9F400A2490B /* shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = shared.framework; path = "../shared/build/xcode-frameworks/Debug/iphonesimulator/shared.framework"; sourceTree = "<group>"; };
@@ -44,7 +44,7 @@
 		5001B6AC2A38C9E400A2490B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5001B6AC2A38C9E400A2490B /* iosApp.app */,
+				5001B6AD2A38C9E400A2490B /* iosApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,7 +76,7 @@
 			);
 			name = iosApp;
 			productName = iosApp;
-			productReference = 5001B6AC2A38C9E400A2490B /* iosApp.app */;
+			productReference = 5001B6AD2A38C9E400A2490B /* iosApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
