@@ -10,28 +10,13 @@
 		5001B6B12A38C9E400A2490B /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5001B6B02A38C9E400A2490B /* iOSApp.swift */; };
 		5001B6B32A38C9E400A2490B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5001B6B22A38C9E400A2490B /* ContentView.swift */; };
 		5001B6B52A38C9F400A2490B /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5001B6B42A38C9F400A2490B /* shared.framework */; };
-		5001B6B62A38C9F400A2490B /* shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5001B6B42A38C9F400A2490B /* shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		5001B6B72A38C9F400A2490B /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				5001B6B62A38C9F400A2490B /* shared.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		5001B6AC2A38C9E400A2490B /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5001B6B02A38C9E400A2490B /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		5001B6B22A38C9E400A2490B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		5001B6B42A38C9F400A2490B /* shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = shared.framework; path = "../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/shared.framework"; sourceTree = "<group>"; };
+		5001B6B42A38C9F400A2490B /* shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = shared.framework; path = "../shared/build/xcode-frameworks/Debug/iphonesimulator/shared.framework"; sourceTree = "<group>"; };
 		5001B6BE2A38CA5B00A2490B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -84,7 +69,6 @@
 				5001B6A82A38C9E400A2490B /* Sources */,
 				5001B6A92A38C9E400A2490B /* Frameworks */,
 				5001B6AA2A38C9E400A2490B /* Resources */,
-				5001B6B72A38C9F400A2490B /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -275,7 +259,7 @@
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
+					"$(PROJECT_DIR)/../shared/build/xcode-frameworks/$(CONFIGURATION)/iphonesimulator",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -304,7 +288,7 @@
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
+					"$(PROJECT_DIR)/../shared/build/xcode-frameworks/$(CONFIGURATION)/iphonesimulator",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = iosApp/Info.plist;

@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -15,6 +16,7 @@ kotlin {
         }
     }
 
+    val xcframework = XCFramework("shared")
     listOf(
         iosX64(),
         iosArm64(),
@@ -23,6 +25,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "shared"
             isStatic = true
+            xcframework.add(this)
         }
     }
 

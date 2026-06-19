@@ -52,18 +52,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build shared XCFramework (Debug, Simulator)
+      - name: Build shared XCFramework (Debug)
         run: ./gradlew :shared:assembleSharedDebugXCFramework
 
-      - name: Copy XCFramework for Xcode
-        run: |
-          mkdir -p shared/build/xcode-frameworks/Debug/iphonesimulator
-          cp -R shared/build/XCFrameworks/debug/shared.xcframework \
-            shared/build/xcode-frameworks/Debug/iphonesimulator/ 2>/dev/null || true
+      - name: Upload XCFramework artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-xcframework
+          path: shared/build/XCFrameworks/debug/shared.xcframework
 
       - name: Build shared framework for simulator
-        run: |
-          ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+        run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
       - name: Prepare framework for Xcode
         run: |
@@ -77,13 +76,14 @@ jobs:
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' \
+            -sdk iphonesimulator \
+            -arch arm64 \
             -derivedDataPath iosApp/build \
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Upload iOS Simulator artifact
+      - name: Upload iOS Simulator app artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iosApp-simulator.app
+          name: iosApp-simulator-app
           path: iosApp/build/Build/Products/Debug-iphonesimulator/iosApp.app
