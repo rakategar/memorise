@@ -15,7 +15,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
-  int _bottomIndex = 0;
   late final AnimationController _ctaPulse;
   late final AnimationController _brainBob;
 
@@ -179,51 +178,90 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     ],
                   ),
                 ),
+                const SizedBox(height: 28),
+
+                // Floating navigation buttons (no bar) — Trophy / Statistik / Toko
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _navButton(
+                      icon: Icons.emoji_events,
+                      label: 'Trophy',
+                      color: const Color(0xFFB45309),
+                      onTap: () {
+                        context.read<QuizController>().soundManager.playSound(SfxType.click);
+                        _showTrophy(context, totalStars);
+                      },
+                    ),
+                    const SizedBox(width: 28),
+                    _navButton(
+                      icon: Icons.bar_chart,
+                      label: 'Statistik',
+                      color: const Color(0xFF2563EB),
+                      onTap: () {
+                        context.read<QuizController>().soundManager.playSound(SfxType.click);
+                        _showStatistik(context, totalStars, solvedStages);
+                      },
+                    ),
+                    const SizedBox(width: 28),
+                    _navButton(
+                      icon: Icons.store,
+                      label: 'Toko',
+                      color: const Color(0xFF7C3AED),
+                      onTap: () {
+                        context.read<QuizController>().soundManager.playSound(SfxType.click);
+                        _showToko(context, totalStars);
+                      },
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _bottomIndex,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFFFBBF24),
-        unselectedItemColor: const Color(0xFF94A3B8),
-        selectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 11,
-          decoration: TextDecoration.none,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 11,
-          decoration: TextDecoration.none,
-        ),
-        elevation: 8,
-        onTap: (i) {
-          setState(() => _bottomIndex = i);
-          context.read<QuizController>().soundManager.playSound(SfxType.click);
-          if (i == 0) _showTrophy(context, totalStars);
-          if (i == 1) _showStatistik(context, totalStars, solvedStages);
-          if (i == 2) _showToko(context, totalStars);
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            activeIcon: Icon(Icons.emoji_events),
-            label: 'Trophy',
+    );
+  }
+
+  /// A circular floating icon button with a label underneath (no surrounding bar).
+  Widget _navButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.28),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: color, size: 28),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            activeIcon: Icon(Icons.bar_chart),
-            label: 'Statistik',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.store_outlined),
-            activeIcon: Icon(Icons.store),
-            label: 'Toko',
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1E355E),
+              decoration: TextDecoration.none,
+            ),
           ),
         ],
       ),

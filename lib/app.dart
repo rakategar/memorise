@@ -45,8 +45,8 @@ class _AuthGateState extends State<_AuthGate> {
   @override
   void initState() {
     super.initState();
-    // On web or when Clerk is not configured, auto-login as guest.
-    if (!AppConfig.isClerkConfigured) {
+    // On web (debug-only) or when Clerk is not configured, auto-login as guest.
+    if (kIsWeb || !AppConfig.isClerkConfigured) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || _guestStarted) return;
         _guestStarted = true;
@@ -60,7 +60,7 @@ class _AuthGateState extends State<_AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (!AppConfig.isClerkConfigured) {
+    if (kIsWeb || !AppConfig.isClerkConfigured) {
       final vm = context.watch<QuizController>();
       if (vm.currentUser == null) return const _SyncingScreen();
       return const _RootRouter();
@@ -179,13 +179,19 @@ class _RootRouterState extends State<_RootRouter> {
         );
     }
 
-    return Container(
+    // A Material ancestor is required so Text widgets inherit a proper text
+    // style; without it Flutter paints the debug yellow double-underline.
+    return Material(
+      type: MaterialType.transparency,
       color: AppColors.background,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
-        switchInCurve: Curves.easeInOut,
-        switchOutCurve: Curves.easeInOut,
-        child: child,
+      child: Container(
+        color: AppColors.background,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          child: child,
+        ),
       ),
     );
   }
