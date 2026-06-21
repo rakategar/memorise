@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:gsheets/gsheets.dart';
 
 import '../config/app_config.dart';
@@ -43,7 +44,9 @@ class RemoteProgressService {
   Worksheet? _usersWs;
   bool _ready = false;
 
-  bool get isEnabled => AppConfig.isSheetsConfigured;
+  // Disabled on web: the service-account JWT token request to Google is blocked
+  // by browser CORS and would hang. Sheets sync runs on Android/iOS only.
+  bool get isEnabled => !kIsWeb && AppConfig.isSheetsConfigured;
 
   /// Connects, and creates/repairs the worksheets + header columns as needed.
   /// Safe to call repeatedly; only does the work once.

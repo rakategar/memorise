@@ -50,50 +50,6 @@ class _SkyMeadowPainter extends CustomPainter {
       ).createShader(skyRect);
     canvas.drawRect(skyRect, skyPaint);
 
-    // 2. Gentle upper clouds (semi-transparent white).
-    final cloudTop = Path()
-      ..moveTo(20 * sx, 100 * sy)
-      ..cubicTo(40 * sx, 100 * sy, 50 * sx, 110 * sy, 60 * sx, 110 * sy)
-      ..cubicTo(70 * sx, 110 * sy, 80 * sx, 100 * sy, 100 * sx, 100 * sy)
-      ..cubicTo(120 * sx, 100 * sy, 130 * sx, 115 * sy, 150 * sx, 115 * sy)
-      ..cubicTo(170 * sx, 115 * sy, 180 * sx, 105 * sy, 200 * sx, 105 * sy)
-      ..cubicTo(220 * sx, 105 * sy, 230 * sx, 120 * sy, 250 * sx, 120 * sy)
-      ..lineTo(250 * sx, 135 * sy)
-      ..lineTo(20 * sx, 135 * sy)
-      ..close();
-    canvas.drawPath(cloudTop, Paint()..color = const Color(0x30FFFFFF));
-
-    // 3. Big fluffy cloud puffs.
-    final cloudBack = Path()
-      ..moveTo(-20 * sx, 440 * sy)
-      ..quadraticBezierTo(10 * sx, 380 * sy, 40 * sx, 400 * sy)
-      ..quadraticBezierTo(80 * sx, 310 * sy, 160 * sx, 330 * sy)
-      ..quadraticBezierTo(220 * sx, 220 * sy, 300 * sx, 260 * sy)
-      ..quadraticBezierTo(340 * sx, 240 * sy, 380 * sx, 280 * sy)
-      ..lineTo(380 * sx, 500 * sy)
-      ..lineTo(-20 * sx, 500 * sy)
-      ..close();
-    canvas.drawPath(cloudBack, Paint()..color = const Color(0xCCE1F4FC));
-
-    final cloudFront = Path()
-      ..moveTo(-10 * sx, 450 * sy)
-      ..quadraticBezierTo(20 * sx, 390 * sy, 50 * sx, 410 * sy)
-      ..quadraticBezierTo(90 * sx, 325 * sy, 165 * sx, 345 * sy)
-      ..quadraticBezierTo(225 * sx, 240 * sy, 295 * sx, 280 * sy)
-      ..quadraticBezierTo(335 * sx, 255 * sy, 375 * sx, 295 * sy)
-      ..lineTo(375 * sx, 502 * sy)
-      ..lineTo(-10 * sx, 502 * sy)
-      ..close();
-    canvas.drawPath(cloudFront, Paint()..color = const Color(0xFFFFFFFF));
-
-    final cloudHi = Path()
-      ..moveTo(80 * sx, 370 * sy)
-      ..quadraticBezierTo(110 * sx, 340 * sy, 140 * sx, 350 * sy)
-      ..quadraticBezierTo(160 * sx, 340 * sy, 180 * sx, 350 * sy)
-      ..quadraticBezierTo(210 * sx, 330 * sy, 230 * sx, 360 * sy)
-      ..close();
-    canvas.drawPath(cloudHi, Paint()..color = const Color(0xFFEBF7FF));
-
     // 4. Distant mountain ranges.
     final mountains = Path()
       ..moveTo(-50 * sx, 600 * sy)

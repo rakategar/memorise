@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/question.dart';
 import 'illustrations.dart';
 
-/// Renders the visual for a question inside a presentation card, or a "recall
-/// memory" placeholder when [isVisible] is false. Ports `QuizIllustration`.
 class QuizIllustration extends StatelessWidget {
   const QuizIllustration({
     super.key,
@@ -20,7 +18,6 @@ class QuizIllustration extends StatelessWidget {
     if (!isVisible) {
       return Container(
         width: double.infinity,
-        height: 200,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFFF7F2FA), Color(0xFFE8DEF8)],
@@ -57,13 +54,12 @@ class QuizIllustration extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 200,
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1B3E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: const Color(0xFFE1E2EC), width: 1.5),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       alignment: Alignment.center,
       child: _buildGraphic(question),
     );
@@ -71,38 +67,33 @@ class QuizIllustration extends StatelessWidget {
 
   Widget _buildGraphic(Question q) {
     switch (q.graphicType) {
-      case GraphicType.emojiRow:
-        return EmojiRowIllustration(emojis: q.graphicData);
-      case GraphicType.geometricNumbers:
-        return const GeometricNumbersIllustration();
-      case GraphicType.playlistCards:
-        return PlaylistCardsIllustration(songs: q.graphicData);
-      case GraphicType.socialIcons:
-        return const SocialIconsIllustration();
-      case GraphicType.trafficLights:
-        return const TrafficLightsIllustration();
-      case GraphicType.whiteboardLetters:
-        return const WhiteboardLettersIllustration();
-      case GraphicType.woodRoom:
-        return const CanvasIllustration(type: GraphicType.woodRoom);
-      case GraphicType.postItNotes:
-        return PostItNotesIllustration(numbers: q.graphicData);
+      case GraphicType.imageAsset:
+        if (q.graphicData.length == 1) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              q.graphicData.first,
+              fit: BoxFit.contain,
+            ),
+          );
+        }
+        // Multiple images (e.g. L1Q5 playlist atas+bawah, L1Q9 lampu+pilihan)
+        return SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: q.graphicData
+                .map((path) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(path, fit: BoxFit.contain),
+                      ),
+                    ))
+                .toList(),
+          ),
+        );
       case GraphicType.letterBubbles:
         return LetterBubblesIllustration(letters: q.graphicData);
-      case GraphicType.spatialCampus:
-        return const CanvasIllustration(type: GraphicType.spatialCampus);
-      case GraphicType.spatialOffice:
-        return CanvasIllustration(type: GraphicType.spatialOffice, elements: q.graphicData);
-      case GraphicType.spatialPark:
-        return const CanvasIllustration(type: GraphicType.spatialPark);
-      case GraphicType.spatialParking:
-        return CanvasIllustration(type: GraphicType.spatialParking, elements: q.graphicData);
-      case GraphicType.spatialClassroom:
-        return const CanvasIllustration(type: GraphicType.spatialClassroom);
-      case GraphicType.spatialLibrary:
-        return const CanvasIllustration(type: GraphicType.spatialLibrary);
-      case GraphicType.spatialDiner:
-        return const CanvasIllustration(type: GraphicType.spatialDiner);
     }
   }
 }

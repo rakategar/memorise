@@ -1,4 +1,5 @@
 import 'package:clerk_flutter/clerk_flutter.dart' as clerk;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,13 +32,38 @@ class MemoriseApp extends StatelessWidget {
 
 /// Gates the game behind Clerk authentication. Shows a config notice when keys
 /// are missing, the sign-in screen when signed out, and the game when signed in.
-class _AuthGate extends StatelessWidget {
+class _AuthGate extends StatefulWidget {
   const _AuthGate();
 
   @override
+  State<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<_AuthGate> {
+  bool _guestStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // On web (debug-only) or when Clerk is not configured, auto-login as guest.
+    if (kIsWeb || !AppConfig.isClerkConfigured) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _guestStarted) return;
+        _guestStarted = true;
+        final controller = context.read<QuizController>();
+        controller.onUserSignedIn(
+          const AppUser(id: 'guest', email: '', name: 'Player'),
+        );
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!AppConfig.isClerkConfigured) {
-      return const _ConfigNeededScreen();
+    if (kIsWeb || !AppConfig.isClerkConfigured) {
+      final vm = context.watch<QuizController>();
+      if (vm.currentUser == null) return const _SyncingScreen();
+      return const _RootRouter();
     }
     return clerk.ClerkErrorListener(
       child: clerk.ClerkAuthBuilder(
@@ -153,13 +179,19 @@ class _RootRouterState extends State<_RootRouter> {
         );
     }
 
-    return Container(
+    // A Material ancestor is required so Text widgets inherit a proper text
+    // style; without it Flutter paints the debug yellow double-underline.
+    return Material(
+      type: MaterialType.transparency,
       color: AppColors.background,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
-        switchInCurve: Curves.easeInOut,
-        switchOutCurve: Curves.easeInOut,
-        child: child,
+      child: Container(
+        color: AppColors.background,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          child: child,
+        ),
       ),
     );
   }

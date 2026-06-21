@@ -32,6 +32,8 @@ class _SummaryScreenState extends State<SummaryScreen> with TickerProviderStateM
   // Star pop controllers: index 0 = center, 1 = left, 2 = right.
   late final List<AnimationController> _starCtrls;
   late final AnimationController _scoreCtrl;
+  // Idle wiggle loop after popup completes.
+  late final AnimationController _idleCtrl;
 
   int get _baseScore => Scoring.baseScore(widget.isSuccess);
   int get _starBonus => Scoring.starBonus(widget.isSuccess, widget.stars);
@@ -49,6 +51,10 @@ class _SummaryScreenState extends State<SummaryScreen> with TickerProviderStateM
       vsync: this,
       duration: const Duration(milliseconds: 1100),
     );
+    _idleCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
     _runSequence();
   }
 
@@ -57,13 +63,15 @@ class _SummaryScreenState extends State<SummaryScreen> with TickerProviderStateM
     if (widget.isSuccess) {
       final earned = [widget.stars >= 1, widget.stars >= 2, widget.stars >= 3];
       for (var i = 0; i < 3; i++) {
-        await Future<void>.delayed(Duration(milliseconds: i == 0 ? 300 : 250));
+        await Future<void>.delayed(Duration(milliseconds: i == 0 ? 300 : 200));
         if (!mounted) return;
         if (earned[i]) vm.soundManager.playSound(SfxType.click);
         _starCtrls[i].forward();
       }
-      await Future<void>.delayed(const Duration(milliseconds: 1200 - 800));
+      // Wait for last star popup to finish then start idle wiggle.
+      await Future<void>.delayed(const Duration(milliseconds: 650));
       if (!mounted) return;
+      _idleCtrl.repeat(reverse: true);
       _scoreCtrl.forward();
     } else {
       await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -80,6 +88,7 @@ class _SummaryScreenState extends State<SummaryScreen> with TickerProviderStateM
       c.dispose();
     }
     _scoreCtrl.dispose();
+    _idleCtrl.dispose();
     super.dispose();
   }
 
@@ -125,6 +134,9 @@ class _SummaryScreenState extends State<SummaryScreen> with TickerProviderStateM
               ),
             ),
           ),
+          // Falling loop confetti — always at the back.
+          if (widget.isSuccess) const Positioned.fill(child: FallingConfettiView()),
+          // One-shot burst explosion on top.
           if (widget.isSuccess) const Positioned.fill(child: ConfettiView()),
         ],
       ),
@@ -154,21 +166,26 @@ class _SummaryScreenState extends State<SummaryScreen> with TickerProviderStateM
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _animatedStar(_starCtrls[1], 46, leftEarned ? on : off),
+        _animatedStar(_starCtrls[1], _idleCtrl, 46, leftEarned ? on : off),
         const SizedBox(width: 16),
-        _animatedStar(_starCtrls[0], 68, centerEarned ? on : off),
+        _animatedStar(_starCtrls[0], _idleCtrl, 68, centerEarned ? on : off),
         const SizedBox(width: 16),
-        _animatedStar(_starCtrls[2], 46, rightEarned ? on : off),
+        _animatedStar(_starCtrls[2], _idleCtrl, 46, rightEarned ? on : off),
       ],
     );
   }
 
-  Widget _animatedStar(AnimationController ctrl, double size, Color color) {
+  Widget _animatedStar(AnimationController ctrl, AnimationController idleCtrl, double size, Color color) {
     return AnimatedBuilder(
-      animation: ctrl,
+      animation: Listenable.merge([ctrl, idleCtrl]),
       builder: (context, child) {
-        final scale = Curves.elasticOut.transform(ctrl.value).clamp(0.0, 1.2);
-        final rotation = (1 - ctrl.value) * (-45) * 3.1415926 / 180;
+        final popDone = ctrl.value >= 1.0;
+        final scale = popDone
+            ? 1.0 + idleCtrl.value * 0.05
+            : Curves.elasticOut.transform(ctrl.value).clamp(0.0, 1.2);
+        final rotation = popDone
+            ? (idleCtrl.value - 0.5) * 0.1   // ±0.05 rad wiggle
+            : (1 - ctrl.value) * (-45) * 3.1415926 / 180;
         return Transform.rotate(
           angle: rotation,
           child: Transform.scale(scale: scale, child: child),

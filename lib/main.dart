@@ -1,4 +1,5 @@
 import 'package:clerk_flutter/clerk_flutter.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -28,8 +29,11 @@ Future<void> main() async {
   );
   controller.start();
 
+  // On web (debug-only target) skip Clerk: its init + the Google Sheets service
+  // account flow are blocked by browser CORS and would hang the UI. Android/iOS
+  // get the full Clerk + Sheets stack.
   Widget root = const MemoriseApp();
-  if (AppConfig.isClerkConfigured) {
+  if (AppConfig.isClerkConfigured && !kIsWeb) {
     root = ClerkAuth(
       config: ClerkAuthConfig(publishableKey: AppConfig.clerkPublishableKey),
       child: root,
