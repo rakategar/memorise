@@ -7,8 +7,6 @@ import '../widgets/bubble_title.dart';
 import '../widgets/sky_meadow_background.dart';
 import '../widgets/smiling_brain.dart';
 
-/// Main menu: profile/stars header, mascot, PLAY + guide/settings buttons,
-/// and Trophy / Statistik / Toko cards, each opening a dialog.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -17,8 +15,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+  int _bottomIndex = 0;
   late final AnimationController _ctaPulse;
-  late final AnimationController _brainPulse;
+  late final AnimationController _brainBob;
 
   @override
   void initState() {
@@ -29,18 +28,18 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       lowerBound: 1.0,
       upperBound: 1.05,
     )..repeat(reverse: true);
-    _brainPulse = AnimationController(
+    _brainBob = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
-      lowerBound: 0.96,
-      upperBound: 1.04,
+      duration: const Duration(milliseconds: 1800),
+      lowerBound: 0.0,
+      upperBound: 1.0,
     )..repeat(reverse: true);
   }
 
   @override
   void dispose() {
     _ctaPulse.dispose();
-    _brainPulse.dispose();
+    _brainBob.dispose();
     super.dispose();
   }
 
@@ -50,108 +49,187 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     final totalStars = vm.progressList.fold<int>(0, (s, p) => s + p.starsCount);
     final solvedStages = vm.progressList.where((p) => p.isCompleted).length;
 
-    return SkyMeadowBackground(
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // Header: profile + stars
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _pill(
-                    bg: Colors.white,
-                    border: const Color(0xFFE2E8F0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('🧑‍🚀', style: TextStyle(fontSize: 16)),
-                        const SizedBox(width: 6),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 120),
-                          child: Text(
-                            vm.currentUser?.name ?? 'Player',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF475569)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _pill(
-                    bg: const Color(0xFFFFFAED),
-                    border: const Color(0xFFFFD54F),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('⭐', style: TextStyle(fontSize: 16)),
-                        const SizedBox(width: 6),
-                        Text('$totalStars',
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Color(0xFFB45309))),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              // Center mascot + title
-              ScaleTransition(scale: _brainPulse, child: const SmilingBrain(size: 150)),
-              const SizedBox(height: 14),
-              const BubbleTitle(),
-              const SizedBox(height: 4),
-              const Text(
-                'Uji Ingatanmu!',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF4F46E5), letterSpacing: 1),
-              ),
-              const SizedBox(height: 28),
-              // PLAY button
-              FractionallySizedBox(
-                widthFactor: 0.9,
-                child: ScaleTransition(
-                  scale: _ctaPulse,
-                  child: SizedBox(
-                    height: 60,
-                    child: ElevatedButton(
-                      onPressed: () => vm.navigateTo(const LevelSelectState()),
-                      style: _btnStyle(const Color(0xFFFBBF24), 22, const Color(0xFFB45309), 2.5),
-                      child: const Text('PLAY',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF78350F))),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              FractionallySizedBox(
-                widthFactor: 0.9,
-                child: Row(
+    return Scaffold(
+      body: SkyMeadowBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Column(
+              children: [
+                // Header: profile + stars
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: _menuButton('PANDUAN', () => _showPanduan(context))),
-                    const SizedBox(width: 12),
-                    Expanded(child: _menuButton('PENGATURAN', () => _showPengaturan(context))),
+                    _pill(
+                      bg: Colors.white,
+                      border: const Color(0xFFE2E8F0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('🧑‍🚀', style: TextStyle(fontSize: 16)),
+                          const SizedBox(width: 6),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 120),
+                            child: Text(
+                              vm.currentUser?.name ?? 'Player',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF475569),
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _pill(
+                      bg: const Color(0xFFFFFAED),
+                      border: const Color(0xFFFFD54F),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('⭐', style: TextStyle(fontSize: 16)),
+                          const SizedBox(width: 6),
+                          Text(
+                            '$totalStars',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFFB45309),
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 18),
-              // Lower cards
-              Row(
-                children: [
-                  Expanded(child: _infoCard('🏆', 'TROPHY', () => _showTrophy(context, totalStars))),
-                  const SizedBox(width: 10),
-                  Expanded(child: _infoCard('📊', 'STATISTIK', () => _showStatistik(context, totalStars, solvedStages))),
-                  const SizedBox(width: 10),
-                  Expanded(child: _infoCard('🧸', 'TOKO', () => _showToko(context, totalStars))),
-                ],
-              ),
-            ],
+                const SizedBox(height: 20),
+
+                // Mascot with idle bobbing animation
+                AnimatedBuilder(
+                  animation: _brainBob,
+                  builder: (_, child) => Transform.translate(
+                    offset: Offset(0, -6 * _brainBob.value),
+                    child: child,
+                  ),
+                  child: const SmilingBrain(size: 140),
+                ),
+                const SizedBox(height: 12),
+
+                const BubbleTitle(),
+                const SizedBox(height: 4),
+                const Text(
+                  'Uji Ingatanmu!',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4F46E5),
+                    letterSpacing: 1,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // PLAY button — primary CTA
+                FractionallySizedBox(
+                  widthFactor: 0.88,
+                  child: ScaleTransition(
+                    scale: _ctaPulse,
+                    child: SizedBox(
+                      height: 62,
+                      child: ElevatedButton.icon(
+                        onPressed: () => vm.navigateTo(const LevelSelectState()),
+                        icon: const Icon(Icons.play_arrow_rounded, size: 28, color: Color(0xFF78350F)),
+                        label: const Text(
+                          'PLAY',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF78350F),
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFBBF24),
+                          elevation: 6,
+                          shadowColor: const Color(0xFFB45309).withValues(alpha: 0.4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            side: const BorderSide(color: Color(0xFFB45309), width: 2),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Secondary buttons — outline style (lower visual weight)
+                FractionallySizedBox(
+                  widthFactor: 0.88,
+                  child: Row(
+                    children: [
+                      Expanded(child: _outlineButton('💡 Panduan', () => _showPanduan(context))),
+                      const SizedBox(width: 10),
+                      Expanded(child: _outlineButton('⚙️ Pengaturan', () => _showPengaturan(context))),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _bottomIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: const Color(0xFFFBBF24),
+        unselectedItemColor: const Color(0xFF94A3B8),
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+          decoration: TextDecoration.none,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 11,
+          decoration: TextDecoration.none,
+        ),
+        elevation: 8,
+        onTap: (i) {
+          setState(() => _bottomIndex = i);
+          context.read<QuizController>().soundManager.playSound(SfxType.click);
+          if (i == 0) _showTrophy(context, totalStars);
+          if (i == 1) _showStatistik(context, totalStars, solvedStages);
+          if (i == 2) _showToko(context, totalStars);
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_events_outlined),
+            activeIcon: Icon(Icons.emoji_events),
+            label: 'Trophy',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart_outlined),
+            activeIcon: Icon(Icons.bar_chart),
+            label: 'Statistik',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.store_outlined),
+            activeIcon: Icon(Icons.store),
+            label: 'Toko',
+          ),
+        ],
       ),
     );
   }
 
-  // ---- small UI helpers ----
   Widget _pill({required Color bg, required Color border, required Widget child}) {
     return Container(
       decoration: BoxDecoration(
@@ -164,50 +242,25 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     );
   }
 
-  ButtonStyle _btnStyle(Color bg, double radius, Color border, double borderW) {
-    return ElevatedButton.styleFrom(
-      backgroundColor: bg,
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radius),
-        side: BorderSide(color: border, width: borderW),
-      ),
-    );
-  }
-
-  Widget _menuButton(String label, VoidCallback onTap) {
+  Widget _outlineButton(String label, VoidCallback onTap) {
     return SizedBox(
-      height: 48,
-      child: ElevatedButton(
+      height: 44,
+      child: OutlinedButton(
         onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Color(0xFF1E3A8A), width: 1.5),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF1E3A8A),
+          side: const BorderSide(color: Color(0xFF93C5FD), width: 1.5),
+          backgroundColor: Colors.white.withValues(alpha: 0.85),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1E3A8A),
+            decoration: TextDecoration.none,
           ),
-        ),
-        child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white)),
-      ),
-    );
-  }
-
-  Widget _infoCard(String emoji, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 82,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFCBD5E1), width: 1.2),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 24)),
-            Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFF1E3A8A))),
-          ],
         ),
       ),
     );
@@ -215,7 +268,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   // ---- Dialogs ----
   void _showPanduan(BuildContext context) {
-    context.read<QuizController>().soundManager.playSound(SfxType.click);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -223,17 +275,25 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Row(children: [
           Text('💡 ', style: TextStyle(fontSize: 22)),
-          Text('Cara Bermain', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A))),
+          Text('Cara Bermain',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A),
+                decoration: TextDecoration.none,
+              )),
         ]),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
-            _GuideRow('⚡ 1. ', Color(0xFFE28743), 'Amati dan ingat susunan/letak gambar dengan teliti sebelum waktu habis!'),
+            _GuideRow('⚡ 1. ', Color(0xFFE28743),
+                'Amati dan ingat susunan/letak gambar dengan teliti sebelum waktu habis!'),
             SizedBox(height: 10),
-            _GuideRow('🧠 2. ', Color(0xFF9B59B6), 'Setelah gambar disembunyikan, jawab pertanyaan berdasarkan ingatan visualmu!'),
+            _GuideRow('🧠 2. ', Color(0xFF9B59B6),
+                'Setelah gambar disembunyikan, jawab pertanyaan berdasarkan ingatan visualmu!'),
             SizedBox(height: 10),
-            _GuideRow('⭐ 3. ', Color(0xFFF1C40F), 'Semakin cepat kamu menjawab dengan benar, semakin banyak BINTANG yang diraih!'),
+            _GuideRow('⭐ 3. ', Color(0xFFF1C40F),
+                'Semakin cepat kamu menjawab dengan benar, semakin banyak BINTANG yang diraih!'),
           ],
         ),
         actions: [
@@ -243,7 +303,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               backgroundColor: const Color(0xFF4CAF50),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('OK, MENGERTI!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+            child: const Text('OK, MENGERTI!',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.none)),
           ),
         ],
       ),
@@ -252,7 +313,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   void _showPengaturan(BuildContext context) {
     final vm = context.read<QuizController>();
-    vm.soundManager.playSound(SfxType.click);
     showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
@@ -261,7 +321,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           title: const Row(children: [
             Text('⚙️ ', style: TextStyle(fontSize: 22)),
-            Text('Pengaturan Game', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A))),
+            Text('Pengaturan Game',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3A8A),
+                  decoration: TextDecoration.none,
+                )),
           ]),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -271,7 +336,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 children: [
                   const Row(children: [
                     Text('🎵  ', style: TextStyle(fontSize: 16)),
-                    Text('Musik Background', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF334155))),
+                    Text('Musik Background',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF334155),
+                          decoration: TextDecoration.none,
+                        )),
                   ]),
                   Switch(
                     value: vm.soundManager.isMusicEnabled,
@@ -287,7 +357,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 children: [
                   const Row(children: [
                     Text('🔊  ', style: TextStyle(fontSize: 16)),
-                    Text('Efek Suara (SFX)', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF334155))),
+                    Text('Efek Suara (SFX)',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF334155),
+                          decoration: TextDecoration.none,
+                        )),
                   ]),
                   Switch(
                     value: vm.soundManager.isSoundEnabled,
@@ -302,7 +377,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text('MANAJEMEN PROGRESS DATA:',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF4F46E5))),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF4F46E5),
+                      decoration: TextDecoration.none,
+                    )),
               ),
               const SizedBox(height: 10),
               Row(
@@ -318,7 +398,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         side: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Reset Data', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      child: const Text('Reset Data',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, decoration: TextDecoration.none)),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -333,7 +414,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text('Unlock All',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                          )),
                     ),
                   ),
                 ],
@@ -348,7 +434,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   },
                   icon: const Icon(Icons.logout, size: 16, color: Color(0xFF64748B)),
                   label: const Text('Keluar Akun',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF64748B),
+                        decoration: TextDecoration.none,
+                      )),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFFCBD5E1)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -364,7 +455,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 backgroundColor: const Color(0xFF2563EB),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('SELESAI', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+              child: const Text('SELESAI',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.none)),
             ),
           ],
         ),
@@ -373,7 +465,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   void _showTrophy(BuildContext context, int totalStars) {
-    context.read<QuizController>().soundManager.playSound(SfxType.click);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -381,18 +472,33 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Row(children: [
           Text('🏆 ', style: TextStyle(fontSize: 24)),
-          Text('Piala Kejuaraan', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFB45309))),
+          Text('Piala Kejuaraan',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFB45309),
+                decoration: TextDecoration.none,
+              )),
         ]),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('🌟 RAJA MEMORI PINTAR 🌟',
-                style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF78350F), fontSize: 16)),
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF78350F),
+                  fontSize: 16,
+                  decoration: TextDecoration.none,
+                )),
             const SizedBox(height: 8),
             Text(
-              'Raih bintang terbanyak di semua level untuk menyempurnakan koleksi piala pahlawan memorimu! \n\nKamu sudah meraih $totalStars bintang dari total 90 bintang!',
+              'Raih bintang terbanyak di semua level untuk menyempurnakan koleksi piala pahlawan memorimu!\n\nKamu sudah meraih $totalStars bintang dari total 90 bintang!',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF475569), height: 1.4, fontSize: 13),
+              style: const TextStyle(
+                color: Color(0xFF475569),
+                height: 1.4,
+                fontSize: 13,
+                decoration: TextDecoration.none,
+              ),
             ),
           ],
         ),
@@ -403,7 +509,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               backgroundColor: const Color(0xFFFFD54F),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('OK!', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF78350F))),
+            child: const Text('OK!',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF78350F),
+                  decoration: TextDecoration.none,
+                )),
           ),
         ],
       ),
@@ -411,7 +522,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   void _showStatistik(BuildContext context, int totalStars, int solvedStages) {
-    context.read<QuizController>().soundManager.playSound(SfxType.click);
     final accuracy = solvedStages > 0 ? ((totalStars / (solvedStages * 3)) * 100).toInt() : 0;
     showDialog(
       context: context,
@@ -420,12 +530,17 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Row(children: [
           Text('📊 ', style: TextStyle(fontSize: 22)),
-          Text('Statistik Bermain', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A))),
+          Text('Statistik Bermain',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A),
+                decoration: TextDecoration.none,
+              )),
         ]),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _StatRow('Bintang Terkumpul:', '$totalStars / 90 ⭐', Color(0xFFE67E22)),
+            _StatRow('Bintang Terkumpul:', '$totalStars / 90 ⭐', const Color(0xFFE67E22)),
             const SizedBox(height: 10),
             _StatRow('Soal Terpecahkan:', '$solvedStages / 30 Soal', const Color(0xFF2ECC71)),
             const SizedBox(height: 10),
@@ -439,7 +554,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               backgroundColor: const Color(0xFF4CAF50),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('MANTAP!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+            child: const Text('MANTAP!',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.none)),
           ),
         ],
       ),
@@ -447,7 +563,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   void _showToko(BuildContext context, int totalStars) {
-    context.read<QuizController>().soundManager.playSound(SfxType.click);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -455,18 +570,33 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Row(children: [
           Text('🧸 ', style: TextStyle(fontSize: 24)),
-          Text('Toko Mainan', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF4A148C))),
+          Text('Toko Mainan',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF4A148C),
+                decoration: TextDecoration.none,
+              )),
         ]),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('🚀 SKIN & MAINAN UNLOCKER 🚀',
-                style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF4A148C), fontSize: 14)),
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF4A148C),
+                  fontSize: 14,
+                  decoration: TextDecoration.none,
+                )),
             const SizedBox(height: 10),
             Text(
               'Kumpulkan minimal 20 Bintang ⭐ untuk membuka Mainan Alien Hijau Lucu 👽!\n\nKumpulkan minimal 45 Bintang ⭐ untuk membuka Skin Kostum Astronot Super 🧑‍🚀!\n\nProgress saat ini: $totalStars Bintang.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF475569), height: 1.4, fontSize: 13),
+              style: const TextStyle(
+                color: Color(0xFF475569),
+                height: 1.4,
+                fontSize: 13,
+                decoration: TextDecoration.none,
+              ),
             ),
           ],
         ),
@@ -477,7 +607,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               backgroundColor: const Color(0xFF9B59B6),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('MULAILAH KUMPULKAN!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+            child: const Text('MULAILAH KUMPULKAN!',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.none)),
           ),
         ],
       ),
@@ -496,8 +627,15 @@ class _GuideRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(prefix, style: TextStyle(fontWeight: FontWeight.bold, color: prefixColor)),
-        Expanded(child: Text(body, style: const TextStyle(color: Color(0xFF334155)))),
+        Text(prefix,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: prefixColor,
+              decoration: TextDecoration.none,
+            )),
+        Expanded(
+            child: Text(body,
+                style: const TextStyle(color: Color(0xFF334155), decoration: TextDecoration.none))),
       ],
     );
   }
@@ -514,8 +652,14 @@ class _StatRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Color(0xFF475569))),
-        Text(value, style: TextStyle(fontWeight: FontWeight.w900, color: valueColor)),
+        Text(label,
+            style: const TextStyle(color: Color(0xFF475569), decoration: TextDecoration.none)),
+        Text(value,
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: valueColor,
+              decoration: TextDecoration.none,
+            )),
       ],
     );
   }
