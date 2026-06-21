@@ -14,7 +14,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   late final AnimationController _ctaPulse;
   late final AnimationController _brainBob;
 
@@ -112,7 +113,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -149,8 +153,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             child: SizedBox(
                               height: 62,
                               child: ElevatedButton.icon(
-                                onPressed: () => vm.navigateTo(const LevelSelectState()),
-                                icon: const Icon(Icons.play_arrow_rounded, size: 28, color: Color(0xFF78350F)),
+                                onPressed: () =>
+                                    vm.navigateTo(const LevelSelectState()),
+                                icon: const Icon(
+                                  Icons.play_arrow_rounded,
+                                  size: 28,
+                                  color: Color(0xFF78350F),
+                                ),
                                 label: const Text(
                                   'PLAY',
                                   style: TextStyle(
@@ -163,26 +172,40 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFFBBF24),
                                   elevation: 6,
-                                  shadowColor: const Color(0xFFB45309).withValues(alpha: 0.4),
+                                  shadowColor: const Color(
+                                    0xFFB45309,
+                                  ).withValues(alpha: 0.4),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(22),
-                                    side: const BorderSide(color: Color(0xFFB45309), width: 2),
+                                    side: const BorderSide(
+                                      color: Color(0xFFB45309),
+                                      width: 2,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-
+                        const SizedBox(height: 200),
                         // Secondary buttons — outline style (lower visual weight)
                         FractionallySizedBox(
                           widthFactor: 0.88,
                           child: Row(
                             children: [
-                              Expanded(child: _outlineButton('💡 Panduan', () => _showPanduan(context))),
+                              Expanded(
+                                child: _outlineButton(
+                                  '💡 Panduan',
+                                  () => _showPanduan(context),
+                                ),
+                              ),
                               const SizedBox(width: 10),
-                              Expanded(child: _outlineButton('⚙️ Pengaturan', () => _showPengaturan(context))),
+                              Expanded(
+                                child: _outlineButton(
+                                  '⚙️ Pengaturan',
+                                  () => _showPengaturan(context),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -197,7 +220,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                               label: 'Trophy',
                               color: const Color(0xFFB45309),
                               onTap: () {
-                                context.read<QuizController>().soundManager.playSound(SfxType.click);
+                                context
+                                    .read<QuizController>()
+                                    .soundManager
+                                    .playSound(SfxType.click);
                                 _showTrophy(context, totalStars);
                               },
                             ),
@@ -207,8 +233,15 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                               label: 'Statistik',
                               color: const Color(0xFF2563EB),
                               onTap: () {
-                                context.read<QuizController>().soundManager.playSound(SfxType.click);
-                                _showStatistik(context, totalStars, solvedStages);
+                                context
+                                    .read<QuizController>()
+                                    .soundManager
+                                    .playSound(SfxType.click);
+                                _showStatistik(
+                                  context,
+                                  totalStars,
+                                  solvedStages,
+                                );
                               },
                             ),
                             const SizedBox(width: 28),
@@ -217,7 +250,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                               label: 'Toko',
                               color: const Color(0xFF7C3AED),
                               onTap: () {
-                                context.read<QuizController>().soundManager.playSound(SfxType.click);
+                                context
+                                    .read<QuizController>()
+                                    .soundManager
+                                    .playSound(SfxType.click);
                                 _showToko(context, totalStars);
                               },
                             ),
@@ -279,7 +315,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     );
   }
 
-  Widget _pill({required Color bg, required Color border, required Widget child}) {
+  Widget _pill({
+    required Color bg,
+    required Color border,
+    required Widget child,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: bg,
@@ -300,7 +340,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           foregroundColor: const Color(0xFF1E3A8A),
           side: const BorderSide(color: Color(0xFF93C5FD), width: 1.5),
           backgroundColor: Colors.white.withValues(alpha: 0.85),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
         child: Text(
           label,
@@ -322,27 +364,40 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Row(children: [
-          Text('💡 ', style: TextStyle(fontSize: 22)),
-          Text('Cara Bermain',
+        title: const Row(
+          children: [
+            Text('💡 ', style: TextStyle(fontSize: 22)),
+            Text(
+              'Cara Bermain',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E3A8A),
                 decoration: TextDecoration.none,
-              )),
-        ]),
+              ),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
-            _GuideRow('⚡ 1. ', Color(0xFFE28743),
-                'Amati dan ingat susunan/letak gambar dengan teliti sebelum waktu habis!'),
+            _GuideRow(
+              '⚡ 1. ',
+              Color(0xFFE28743),
+              'Amati dan ingat susunan/letak gambar dengan teliti sebelum waktu habis!',
+            ),
             SizedBox(height: 10),
-            _GuideRow('🧠 2. ', Color(0xFF9B59B6),
-                'Setelah gambar disembunyikan, jawab pertanyaan berdasarkan ingatan visualmu!'),
+            _GuideRow(
+              '🧠 2. ',
+              Color(0xFF9B59B6),
+              'Setelah gambar disembunyikan, jawab pertanyaan berdasarkan ingatan visualmu!',
+            ),
             SizedBox(height: 10),
-            _GuideRow('⭐ 3. ', Color(0xFFF1C40F),
-                'Semakin cepat kamu menjawab dengan benar, semakin banyak BINTANG yang diraih!'),
+            _GuideRow(
+              '⭐ 3. ',
+              Color(0xFFF1C40F),
+              'Semakin cepat kamu menjawab dengan benar, semakin banyak BINTANG yang diraih!',
+            ),
           ],
         ),
         actions: [
@@ -350,10 +405,18 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4CAF50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('OK, MENGERTI!',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.none)),
+            child: const Text(
+              'OK, MENGERTI!',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                decoration: TextDecoration.none,
+              ),
+            ),
           ),
         ],
       ),
@@ -367,31 +430,41 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       builder: (_) => StatefulBuilder(
         builder: (ctx, setLocal) => AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: const Row(children: [
-            Text('⚙️ ', style: TextStyle(fontSize: 22)),
-            Text('Pengaturan Game',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: const Row(
+            children: [
+              Text('⚙️ ', style: TextStyle(fontSize: 22)),
+              Text(
+                'Pengaturan Game',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1E3A8A),
                   decoration: TextDecoration.none,
-                )),
-          ]),
+                ),
+              ),
+            ],
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(children: [
-                    Text('🎵  ', style: TextStyle(fontSize: 16)),
-                    Text('Musik Background',
+                  const Row(
+                    children: [
+                      Text('🎵  ', style: TextStyle(fontSize: 16)),
+                      Text(
+                        'Musik Background',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF334155),
                           decoration: TextDecoration.none,
-                        )),
-                  ]),
+                        ),
+                      ),
+                    ],
+                  ),
                   Switch(
                     value: vm.soundManager.isMusicEnabled,
                     onChanged: (_) {
@@ -404,15 +477,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(children: [
-                    Text('🔊  ', style: TextStyle(fontSize: 16)),
-                    Text('Efek Suara (SFX)',
+                  const Row(
+                    children: [
+                      Text('🔊  ', style: TextStyle(fontSize: 16)),
+                      Text(
+                        'Efek Suara (SFX)',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF334155),
                           decoration: TextDecoration.none,
-                        )),
-                  ]),
+                        ),
+                      ),
+                    ],
+                  ),
                   Switch(
                     value: vm.soundManager.isSoundEnabled,
                     onChanged: (_) {
@@ -425,13 +502,15 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               const Divider(color: Color(0xFFE2E8F0)),
               const Align(
                 alignment: Alignment.centerLeft,
-                child: Text('MANAJEMEN PROGRESS DATA:',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF4F46E5),
-                      decoration: TextDecoration.none,
-                    )),
+                child: Text(
+                  'MANAJEMEN PROGRESS DATA:',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF4F46E5),
+                    decoration: TextDecoration.none,
+                  ),
+                ),
               ),
               const SizedBox(height: 10),
               Row(
@@ -444,11 +523,22 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFFEF4444),
-                        side: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        side: const BorderSide(
+                          color: Color(0xFFEF4444),
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Reset Data',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, decoration: TextDecoration.none)),
+                      child: const Text(
+                        'Reset Data',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -460,15 +550,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6366F1),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Unlock All',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            decoration: TextDecoration.none,
-                          )),
+                      child: const Text(
+                        'Unlock All',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -481,17 +575,25 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     Navigator.pop(context);
                     vm.requestSignOut();
                   },
-                  icon: const Icon(Icons.logout, size: 16, color: Color(0xFF64748B)),
-                  label: const Text('Keluar Akun',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF64748B),
-                        decoration: TextDecoration.none,
-                      )),
+                  icon: const Icon(
+                    Icons.logout,
+                    size: 16,
+                    color: Color(0xFF64748B),
+                  ),
+                  label: const Text(
+                    'Keluar Akun',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF64748B),
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFFCBD5E1)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -502,10 +604,18 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('SELESAI',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.none)),
+              child: const Text(
+                'SELESAI',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  decoration: TextDecoration.none,
+                ),
+              ),
             ),
           ],
         ),
@@ -519,25 +629,31 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFFFFFAF0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Row(children: [
-          Text('🏆 ', style: TextStyle(fontSize: 24)),
-          Text('Piala Kejuaraan',
+        title: const Row(
+          children: [
+            Text('🏆 ', style: TextStyle(fontSize: 24)),
+            Text(
+              'Piala Kejuaraan',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Color(0xFFB45309),
                 decoration: TextDecoration.none,
-              )),
-        ]),
+              ),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🌟 RAJA MEMORI PINTAR 🌟',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF78350F),
-                  fontSize: 16,
-                  decoration: TextDecoration.none,
-                )),
+            const Text(
+              '🌟 RAJA MEMORI PINTAR 🌟',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF78350F),
+                fontSize: 16,
+                decoration: TextDecoration.none,
+              ),
+            ),
             const SizedBox(height: 8),
             Text(
               'Raih bintang terbanyak di semua level untuk menyempurnakan koleksi piala pahlawan memorimu!\n\nKamu sudah meraih $totalStars bintang dari total 90 bintang!',
@@ -556,14 +672,18 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFFD54F),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('OK!',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF78350F),
-                  decoration: TextDecoration.none,
-                )),
+            child: const Text(
+              'OK!',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF78350F),
+                decoration: TextDecoration.none,
+              ),
+            ),
           ),
         ],
       ),
@@ -571,29 +691,47 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   void _showStatistik(BuildContext context, int totalStars, int solvedStages) {
-    final accuracy = solvedStages > 0 ? ((totalStars / (solvedStages * 3)) * 100).toInt() : 0;
+    final accuracy = solvedStages > 0
+        ? ((totalStars / (solvedStages * 3)) * 100).toInt()
+        : 0;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Row(children: [
-          Text('📊 ', style: TextStyle(fontSize: 22)),
-          Text('Statistik Bermain',
+        title: const Row(
+          children: [
+            Text('📊 ', style: TextStyle(fontSize: 22)),
+            Text(
+              'Statistik Bermain',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E3A8A),
                 decoration: TextDecoration.none,
-              )),
-        ]),
+              ),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _StatRow('Bintang Terkumpul:', '$totalStars / 90 ⭐', const Color(0xFFE67E22)),
+            _StatRow(
+              'Bintang Terkumpul:',
+              '$totalStars / 90 ⭐',
+              const Color(0xFFE67E22),
+            ),
             const SizedBox(height: 10),
-            _StatRow('Soal Terpecahkan:', '$solvedStages / 30 Soal', const Color(0xFF2ECC71)),
+            _StatRow(
+              'Soal Terpecahkan:',
+              '$solvedStages / 30 Soal',
+              const Color(0xFF2ECC71),
+            ),
             const SizedBox(height: 10),
-            _StatRow('Predikat Akurasi:', '$accuracy %', const Color(0xFF3498DB)),
+            _StatRow(
+              'Predikat Akurasi:',
+              '$accuracy %',
+              const Color(0xFF3498DB),
+            ),
           ],
         ),
         actions: [
@@ -601,10 +739,18 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4CAF50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('MANTAP!',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.none)),
+            child: const Text(
+              'MANTAP!',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                decoration: TextDecoration.none,
+              ),
+            ),
           ),
         ],
       ),
@@ -617,25 +763,31 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Row(children: [
-          Text('🧸 ', style: TextStyle(fontSize: 24)),
-          Text('Toko Mainan',
+        title: const Row(
+          children: [
+            Text('🧸 ', style: TextStyle(fontSize: 24)),
+            Text(
+              'Toko Mainan',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF4A148C),
                 decoration: TextDecoration.none,
-              )),
-        ]),
+              ),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🚀 SKIN & MAINAN UNLOCKER 🚀',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF4A148C),
-                  fontSize: 14,
-                  decoration: TextDecoration.none,
-                )),
+            const Text(
+              '🚀 SKIN & MAINAN UNLOCKER 🚀',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF4A148C),
+                fontSize: 14,
+                decoration: TextDecoration.none,
+              ),
+            ),
             const SizedBox(height: 10),
             Text(
               'Kumpulkan minimal 20 Bintang ⭐ untuk membuka Mainan Alien Hijau Lucu 👽!\n\nKumpulkan minimal 45 Bintang ⭐ untuk membuka Skin Kostum Astronot Super 🧑‍🚀!\n\nProgress saat ini: $totalStars Bintang.',
@@ -654,10 +806,18 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF9B59B6),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('MULAILAH KUMPULKAN!',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.none)),
+            child: const Text(
+              'MULAILAH KUMPULKAN!',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                decoration: TextDecoration.none,
+              ),
+            ),
           ),
         ],
       ),
@@ -676,15 +836,23 @@ class _GuideRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(prefix,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: prefixColor,
-              decoration: TextDecoration.none,
-            )),
+        Text(
+          prefix,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: prefixColor,
+            decoration: TextDecoration.none,
+          ),
+        ),
         Expanded(
-            child: Text(body,
-                style: const TextStyle(color: Color(0xFF334155), decoration: TextDecoration.none))),
+          child: Text(
+            body,
+            style: const TextStyle(
+              color: Color(0xFF334155),
+              decoration: TextDecoration.none,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -701,14 +869,21 @@ class _StatRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: const TextStyle(color: Color(0xFF475569), decoration: TextDecoration.none)),
-        Text(value,
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              color: valueColor,
-              decoration: TextDecoration.none,
-            )),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF475569),
+            decoration: TextDecoration.none,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: valueColor,
+            decoration: TextDecoration.none,
+          ),
+        ),
       ],
     );
   }
