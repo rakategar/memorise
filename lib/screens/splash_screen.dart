@@ -51,12 +51,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     return Scaffold(
       body: SkyMeadowBackground(
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-            child: Column(
-              children: [
-                // Header: profile + stars
-                Row(
+          child: Column(
+            children: [
+              // Header: profile + stars — pinned at top
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _pill(
@@ -106,118 +106,129 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+              ),
 
-                // Mascot with idle bobbing animation
-                AnimatedBuilder(
-                  animation: _brainBob,
-                  builder: (_, child) => Transform.translate(
-                    offset: Offset(0, -6 * _brainBob.value),
-                    child: child,
-                  ),
-                  child: const SmilingBrain(size: 140),
-                ),
-                const SizedBox(height: 12),
+              // Main content — vertically centered in remaining space
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Mascot with idle bobbing animation
+                        AnimatedBuilder(
+                          animation: _brainBob,
+                          builder: (_, child) => Transform.translate(
+                            offset: Offset(0, -6 * _brainBob.value),
+                            child: child,
+                          ),
+                          child: const SmilingBrain(size: 140),
+                        ),
+                        const SizedBox(height: 12),
 
-                const BubbleTitle(),
-                const SizedBox(height: 4),
-                const Text(
-                  'Uji Ingatanmu!',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4F46E5),
-                    letterSpacing: 1,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // PLAY button — primary CTA
-                FractionallySizedBox(
-                  widthFactor: 0.88,
-                  child: ScaleTransition(
-                    scale: _ctaPulse,
-                    child: SizedBox(
-                      height: 62,
-                      child: ElevatedButton.icon(
-                        onPressed: () => vm.navigateTo(const LevelSelectState()),
-                        icon: const Icon(Icons.play_arrow_rounded, size: 28, color: Color(0xFF78350F)),
-                        label: const Text(
-                          'PLAY',
+                        const BubbleTitle(),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Uji Ingatanmu!',
                           style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF78350F),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF4F46E5),
+                            letterSpacing: 1,
                             decoration: TextDecoration.none,
                           ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFBBF24),
-                          elevation: 6,
-                          shadowColor: const Color(0xFFB45309).withValues(alpha: 0.4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22),
-                            side: const BorderSide(color: Color(0xFFB45309), width: 2),
+                        const SizedBox(height: 24),
+
+                        // PLAY button — primary CTA
+                        FractionallySizedBox(
+                          widthFactor: 0.88,
+                          child: ScaleTransition(
+                            scale: _ctaPulse,
+                            child: SizedBox(
+                              height: 62,
+                              child: ElevatedButton.icon(
+                                onPressed: () => vm.navigateTo(const LevelSelectState()),
+                                icon: const Icon(Icons.play_arrow_rounded, size: 28, color: Color(0xFF78350F)),
+                                label: const Text(
+                                  'PLAY',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF78350F),
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFBBF24),
+                                  elevation: 6,
+                                  shadowColor: const Color(0xFFB45309).withValues(alpha: 0.4),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(22),
+                                    side: const BorderSide(color: Color(0xFFB45309), width: 2),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 10),
+
+                        // Secondary buttons — outline style (lower visual weight)
+                        FractionallySizedBox(
+                          widthFactor: 0.88,
+                          child: Row(
+                            children: [
+                              Expanded(child: _outlineButton('💡 Panduan', () => _showPanduan(context))),
+                              const SizedBox(width: 10),
+                              Expanded(child: _outlineButton('⚙️ Pengaturan', () => _showPengaturan(context))),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+
+                        // Floating navigation buttons (no bar) — Trophy / Statistik / Toko
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _navButton(
+                              icon: Icons.emoji_events,
+                              label: 'Trophy',
+                              color: const Color(0xFFB45309),
+                              onTap: () {
+                                context.read<QuizController>().soundManager.playSound(SfxType.click);
+                                _showTrophy(context, totalStars);
+                              },
+                            ),
+                            const SizedBox(width: 28),
+                            _navButton(
+                              icon: Icons.bar_chart,
+                              label: 'Statistik',
+                              color: const Color(0xFF2563EB),
+                              onTap: () {
+                                context.read<QuizController>().soundManager.playSound(SfxType.click);
+                                _showStatistik(context, totalStars, solvedStages);
+                              },
+                            ),
+                            const SizedBox(width: 28),
+                            _navButton(
+                              icon: Icons.store,
+                              label: 'Toko',
+                              color: const Color(0xFF7C3AED),
+                              onTap: () {
+                                context.read<QuizController>().soundManager.playSound(SfxType.click);
+                                _showToko(context, totalStars);
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-
-                // Secondary buttons — outline style (lower visual weight)
-                FractionallySizedBox(
-                  widthFactor: 0.88,
-                  child: Row(
-                    children: [
-                      Expanded(child: _outlineButton('💡 Panduan', () => _showPanduan(context))),
-                      const SizedBox(width: 10),
-                      Expanded(child: _outlineButton('⚙️ Pengaturan', () => _showPengaturan(context))),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 28),
-
-                // Floating navigation buttons (no bar) — Trophy / Statistik / Toko
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _navButton(
-                      icon: Icons.emoji_events,
-                      label: 'Trophy',
-                      color: const Color(0xFFB45309),
-                      onTap: () {
-                        context.read<QuizController>().soundManager.playSound(SfxType.click);
-                        _showTrophy(context, totalStars);
-                      },
-                    ),
-                    const SizedBox(width: 28),
-                    _navButton(
-                      icon: Icons.bar_chart,
-                      label: 'Statistik',
-                      color: const Color(0xFF2563EB),
-                      onTap: () {
-                        context.read<QuizController>().soundManager.playSound(SfxType.click);
-                        _showStatistik(context, totalStars, solvedStages);
-                      },
-                    ),
-                    const SizedBox(width: 28),
-                    _navButton(
-                      icon: Icons.store,
-                      label: 'Toko',
-                      color: const Color(0xFF7C3AED),
-                      onTap: () {
-                        context.read<QuizController>().soundManager.playSound(SfxType.click);
-                        _showToko(context, totalStars);
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
