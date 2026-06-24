@@ -9,6 +9,13 @@ class AppConfig {
 
   static String get clerkPublishableKey => dotenv.maybeGet('CLERK_PUBLISHABLE_KEY') ?? '';
 
+  /// Google Cloud OAuth **Web** client ID, used by the native Google sign-in
+  /// (`google_sign_in`) as `serverClientId` so Clerk can verify the id-token.
+  static String get googleServerClientId => dotenv.maybeGet('GOOGLE_SERVER_CLIENT_ID') ?? '';
+
+  /// Whether the native Google account-picker flow is configured.
+  static bool get isGoogleNativeConfigured => googleServerClientId.trim().isNotEmpty;
+
   static String get spreadsheetId => dotenv.maybeGet('GOOGLE_SHEETS_SPREADSHEET_ID') ?? '';
 
   static String get sheetsCredentials => dotenv.maybeGet('GOOGLE_SHEETS_CREDENTIALS') ?? '';
